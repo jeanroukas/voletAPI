@@ -1,0 +1,90 @@
+SCHÉMA DE CÂBLAGE - CONTRÔLE DE VOLETS AVEC ESP8266 ET MODULES I2C HW-171
+===========================================================================
+
++---------------+                   +-------------------+
+|               |                   |                   |
+|  ESP8266      |                   |  MODULE HW-171 #1 |
+|  NodeMCU v3   |                   |  (Adresse 0x20)   |
+|               |                   |                   |
+|  D1 (GPIO 5)  |------- SCL ------>| SCL              |
+|               |                   |                   |
+|  D2 (GPIO 4)  |------- SDA ------>| SDA              |
+|               |                   |                   |
+|  3.3V         |------- VCC ------>| VCC              |
+|               |                   |                   |
+|  GND          |------- GND ------>| GND              |
+|               |                   |                   |
++---------------+                   |  P0 ------------>| Relais 1 (Volet 1 Montée)
+                                    |  P1 ------------>| Relais 2 (Volet 2 Montée)
+                                    |  P2 ------------>| Relais 3 (Volet 3 Montée)
+                                    |  P3 ------------>| Relais 4 (Volet 4 Montée)
+                                    |  P4 ------------>| Relais 5 (Volet 5 Montée)
+                                    |  P5 ------------>| Relais 6 (Volet 6 Montée)
+                                    |  P6 ------------>| Relais 7 (Volet 1 Descente)
+                                    |  P7 ------------>| Relais 8 (Volet 2 Descente)
+                                    |                   |
+                                    +-------------------+
+                                    
+                                    +-------------------+
+                                    |                   |
+                                    |  MODULE HW-171 #2 |
+                                    |  (Adresse 0x21)   |
+                                    |                   |
+                                    |  SCL <------------| SCL (depuis ESP8266)
+                                    |                   |
+                                    |  SDA <------------| SDA (depuis ESP8266)
+                                    |                   |
+                                    |  VCC <------------| VCC (depuis ESP8266)
+                                    |                   |
+                                    |  GND <------------| GND (depuis ESP8266)
+                                    |                   |
+                                    |  P0 ------------>| Relais 9  (Volet 3 Descente)
+                                    |  P1 ------------>| Relais 10 (Volet 4 Descente)
+                                    |  P2 ------------>| Relais 11 (Volet 5 Descente)
+                                    |  P3 ------------>| Relais 12 (Volet 6 Descente)
+                                    |  P4              | (Non utilisé - disponible)
+                                    |  P5              | (Non utilisé - disponible)
+                                    |  P6              | (Non utilisé - disponible)
+                                    |  P7              | (Non utilisé - disponible)
+                                    |                   |
+                                    +-------------------+
+
+CONFIGURATION DES ADRESSES I2C
+==============================
+
+Pour configurer les adresses des modules HW-171, utilisez les cavaliers A0, A1 et A2:
+
+Module #1 (0x20): Tous les cavaliers à 0 (retirés)
+  A0 = 0, A1 = 0, A2 = 0
+
+Module #2 (0x21): A0 = 1 (installé), A1 = 0, A2 = 0
+  A0 = 1, A1 = 0, A2 = 0
+
+CONNEXION DES RELAIS
+====================
+
+Chaque sortie des modules HW-171 est connectée à un relais:
+
+1. Connectez le pin P du module HW-171 à l'entrée de commande du relais
+2. Connectez le GND du module à la masse du relais
+3. Assurez-vous que les relais ont leur propre alimentation
+
+NOTE: Les relais sont généralement actifs à l'état bas (LOW), c'est pourquoi
+      le code envoie un signal LOW pour activer un relais et HIGH pour le désactiver.
+
+ALIMENTATION
+============
+
+1. L'ESP8266 peut être alimenté via USB ou via une alimentation 5V externe
+2. Les modules HW-171 sont alimentés en 3.3V depuis l'ESP8266
+3. Les relais doivent avoir leur propre alimentation (généralement 5V ou 12V)
+   selon les spécifications des relais utilisés
+
+ARCHITECTURE GLOBALE DU SYSTÈME
+===============================
+
+[Google Home] <---> [MQTT Broker] <---> [ESP8266] <---> [Modules I2C] <---> [Relais] <---> [Volets]
+   |                    |                  |
+   |                    |                  |
+   +--------------------+------------------+
+            Communication WiFi
